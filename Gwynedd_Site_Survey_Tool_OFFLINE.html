@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Site Survey">
+<title>Site Survey — Gwynedd Estates (Offline)</title>
+<style>
+  :root{
+    --navy:#152238;
+    --navy-2:#1F3864;
+    --amber:#C97A2B;
+    --amber-dark:#A6611F;
+    --paper:#F7F5F1;
+    --card:#FFFFFF;
+    --line:#DAD6CE;
+    --ink:#1B1B1B;
+    --ink-soft:#5B5B57;
+    --ok:#2E7D46;
+    --warn:#B23B2E;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:96px;
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:14px 16px 12px;
+    position:sticky;
+    top:0;
+    z-index:20;
+    box-shadow:0 2px 8px rgba(0,0,0,0.18);
+  }
+  header .title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:8px;
+  }
+  header h1{
+    font-size:17px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:0.2px;
+  }
+  header .sub{
+    font-size:11.5px;
+    color:#C7CEDB;
+    margin-top:2px;
+  }
+  .meta-toggle{
+    background:none;
+    border:1px solid rgba(255,255,255,0.35);
+    color:#fff;
+    font-size:11px;
+    padding:5px 9px;
+    border-radius:20px;
+  }
+  .meta-panel{
+    margin-top:10px;
+    display:none;
+    gap:8px;
+    flex-direction:column;
+  }
+  .meta-panel.open{display:flex;}
+  .meta-panel input{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.25);
+    color:#fff;
+    padding:8px 10px;
+    border-radius:8px;
+    font-size:13px;
+  }
+  .meta-panel input::placeholder{color:#9AA6BC;}
+
+  main{padding:14px 12px 8px;}
+
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state .big{
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .empty-state .small{font-size:13px;}
+
+  .entry-list{display:flex;flex-direction:column;gap:10px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 13px;
+    display:flex;
+    gap:11px;
+  }
+  .card .thumb{
+    width:56px;height:56px;flex:none;
+    border-radius:8px;
+    background:#EDEAE3 center/cover no-repeat;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);font-size:10px;
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .card .thumb .count{
+    position:absolute;bottom:-5px;right:-5px;
+    background:var(--navy-2);color:#fff;
+    font-size:9px;font-weight:700;
+    border-radius:10px;padding:1px 5px;
+    border:1.5px solid var(--paper);
+  }
+  .card .body{flex:1;min-width:0;}
+  .card .row1{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:6px;
+  }
+  .badge{
+    display:inline-block;
+    font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.4px;
+    color:#fff;background:var(--navy-2);
+    padding:3px 7px;border-radius:5px;
+    white-space:nowrap;
+  }
+  .card .loc{
+    font-size:14px;font-weight:600;margin-top:5px;
+    color:var(--ink);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .card .snippet{
+    font-size:12.5px;color:var(--ink-soft);
+    margin-top:2px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .card .ts{font-size:10.5px;color:#9C978C;margin-top:6px;}
+  .card .save-flag{
+    font-size:10.5px;color:var(--warn);margin-top:4px;font-weight:600;
+  }
+  .card{cursor:pointer;}
+  .card:active{background:#FBFAF7;}
+
+  .fab{
+    position:fixed;right:18px;bottom:22px;
+    width:58px;height:58px;border-radius:50%;
+    background:var(--amber);color:#fff;
+    border:none;
+    font-size:28px;font-weight:400;
+    box-shadow:0 4px 14px rgba(0,0,0,0.3);
+    z-index:30;
+    display:flex;align-items:center;justify-content:center;
+    line-height:0;
+  }
+  .fab:active{background:var(--amber-dark);}
+
+  .toolbar{
+    display:flex;gap:8px;margin-bottom:12px;
+  }
+  .toolbar button{
+    flex:1;
+    font-size:12.5px;font-weight:600;
+    padding:9px 6px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--ink);
+  }
+  .toolbar button.primary{
+    background:var(--navy-2);color:#fff;border-color:var(--navy-2);
+  }
+  .toolbar button:active{opacity:0.8;}
+
+  /* Sheet / modal */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(20,18,14,0.45);
+    z-index:40;
+    display:none;
+  }
+  .overlay.open{display:block;}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;
+    max-height:92vh;
+    background:var(--paper);
+    border-radius:16px 16px 0 0;
+    z-index:41;
+    transform:translateY(100%);
+    transition:transform 0.22s ease;
+    display:flex;flex-direction:column;
+  }
+  .sheet.open{transform:translateY(0);}
+  .sheet-header{
+    padding:12px 16px 10px;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--card);
+    border-radius:16px 16px 0 0;
+  }
+  .sheet-header h2{font-size:15px;margin:0;font-weight:700;}
+  .sheet-header button{
+    background:none;border:none;font-size:14px;color:var(--navy-2);font-weight:600;padding:4px 6px;
+  }
+  .sheet-body{
+    padding:14px 16px 24px;
+    overflow-y:auto;
+  }
+  label{
+    display:block;font-size:11.5px;font-weight:700;
+    color:var(--ink-soft);text-transform:uppercase;letter-spacing:0.3px;
+    margin:14px 0 5px;
+  }
+  label:first-child{margin-top:0;}
+  select,input[type=text],textarea{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:14.5px;
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='%235B5B57' d='M5 7l5 5 5-5z'/></svg>");
+    background-repeat:no-repeat;background-position:right 10px center;
+    padding-right:32px;
+  }
+  textarea{min-height:70px;resize:vertical;}
+  .field-grid{display:flex;flex-direction:column;gap:0;}
+  .hint{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+
+  .photo-row{
+    display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;
+  }
+  .photo-thumb{
+    width:72px;height:72px;border-radius:8px;
+    background:#EDEAE3 center/cover no-repeat;
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .photo-thumb .remove{
+    position:absolute;top:-6px;right:-6px;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--warn);color:#fff;
+    font-size:12px;line-height:20px;text-align:center;
+    border:2px solid var(--paper);
+  }
+  .add-photo-btn{
+    width:72px;height:72px;border-radius:8px;
+    border:1.5px dashed var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .save-row{
+    display:flex;gap:10px;margin-top:20px;
+  }
+  .save-row button{
+    flex:1;padding:13px;border-radius:9px;font-size:14.5px;font-weight:700;border:none;
+  }
+  .btn-save{background:var(--navy-2);color:#fff;}
+  .btn-delete{background:#fff;color:var(--warn);border:1px solid var(--warn) !important;}
+
+  .banner{
+    font-size:12px;padding:8px 11px;border-radius:8px;margin-bottom:10px;
+    display:none;
+  }
+  .banner.show{display:block;}
+  .banner.err{background:#FBE7E4;color:var(--warn);}
+  .banner.ok{background:#E5F1E8;color:var(--ok);}
+
+  .export-text{
+    width:100%;min-height:220px;
+    font-family:ui-monospace,Menlo,monospace;
+    font-size:11.5px;
+    padding:10px;
+    border:1px solid var(--line);border-radius:8px;
+    background:#fff;
+  }
+  .loading{
+    text-align:center;padding:40px 10px;color:var(--ink-soft);font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <div>
+      <h1 id="siteTitle">Site Survey</h1>
+      <div class="sub" id="siteSub">Loading…</div>
+    </div>
+    <button class="meta-toggle" onclick="toggleMeta()">Edit info</button>
+  </div>
+  <div class="meta-panel" id="metaPanel">
+    <input type="text" id="metaSite" placeholder="Community name">
+    <input type="text" id="metaDate" placeholder="Date (e.g. 2026-07-14)">
+    <input type="text" id="metaSurveyor" placeholder="Surveyor name">
+    <button class="meta-toggle" style="align-self:flex-start" onclick="saveMeta()">Save info</button>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button onclick="openExport()">Export summary</button>
+    <button onclick="confirmReset()">Reset data</button>
+  </div>
+  <div id="banner" class="banner"></div>
+  <div id="listArea"><div class="loading">Loading entries…</div></div>
+</main>
+
+<button class="fab" onclick="openNewEntry()">+</button>
+
+<!-- Entry sheet -->
+<div class="overlay" id="overlay" onclick="closeSheetIfOverlay(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-header">
+      <h2 id="sheetTitle">New Entry</h2>
+      <button onclick="closeSheet()">Close</button>
+    </div>
+    <div class="sheet-body" id="sheetBody">
+      <div id="entryBanner" class="banner"></div>
+
+      <label>Category</label>
+      <select id="fCategory" onchange="renderCategoryFields()"></select>
+
+      <label>Location label</label>
+      <input type="text" id="fLocation" placeholder="e.g. Welcome House — panel closet">
+
+      <div id="dynamicFields" class="field-grid"></div>
+
+      <label>Notes</label>
+      <textarea id="fNotes" placeholder="Anything else worth recording"></textarea>
+
+      <label>Photos</label>
+      <div class="photo-row" id="photoRow"></div>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoFile(event)">
+      <div class="hint">Photos are resized before saving to keep storage compact. Up to 6 per entry.</div>
+
+      <div class="save-row">
+        <button class="btn-save" onclick="saveEntry()">Save entry</button>
+      </div>
+      <div class="save-row" id="deleteRow" style="display:none">
+        <button class="btn-delete" onclick="deleteEntry()">Delete entry</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export sheet -->
+<div class="overlay" id="exportOverlay" onclick="closeExportIfOverlay(event)">
+  <div class="sheet" id="exportSheet">
+    <div class="sheet-header">
+      <h2>Export summary</h2>
+      <button onclick="closeExport()">Close</button>
+    </div>
+    <div class="sheet-body">
+      <div class="hint" style="margin-bottom:10px;">Select all and copy, or use Share if your browser supports it. Photos stay in the entries themselves — this is the text record for correlating later.</div>
+      <textarea class="export-text" id="exportText" readonly></textarea>
+      <div class="save-row">
+        <button class="btn-save" onclick="shareExport()">Share / Copy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Local storage shim (IndexedDB-backed) ---
+// Mimics the {get,set,delete} shape this app was originally written against,
+// but keeps everything on-device so it works fully offline with no server round-trip.
+// IndexedDB is used instead of localStorage because iOS Safari's localStorage
+// quota (~5MB) fills up fast once photos are involved; IndexedDB has much more headroom.
+const storage = (function(){
+  let dbPromise = null;
+  function openDb(){
+    if(dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject)=>{
+      const req = indexedDB.open("gwynedd_survey_db", 1);
+      req.onupgradeneeded = ()=>{
+        req.result.createObjectStore("kv");
+      };
+      req.onsuccess = ()=> resolve(req.result);
+      req.onerror = ()=> reject(req.error);
+    });
+    return dbPromise;
+  }
+  async function get(key){
+    const db = await openDb();
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction("kv","readonly");
+      const req = tx.objectStore("kv").get(key);
+      req.onsuccess = ()=> {
+        if(req.result === undefined){ reject(new Error("not found")); return; }
+        resolve({key, value: req.result});
+      };
+      req.onerror = ()=> reject(req.error);
+    });
+  }
+  async function set(key, value){
+    const db = await openDb();
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction("kv","readwrite");
+      tx.objectStore("kv").put(value, key);
+      tx.oncomplete = ()=> resolve({key, value});
+      tx.onerror = ()=> reject(tx.error);
+    });
+  }
+  async function del(key){
+    const db = await openDb();
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction("kv","readwrite");
+      tx.objectStore("kv").delete(key);
+      tx.oncomplete = ()=> resolve({key, deleted:true});
+      tx.onerror = ()=> reject(tx.error);
+    });
+  }
+  return { get, set, delete: del };
+})();
+</script>
+<script>
+
+const CATEGORIES = {
+  panel: {
+    label: "Access Control Panel",
+    fields: [
+      {key:"model", label:"Manufacturer / model", type:"text", placeholder:"e.g. Premisys P-2500"},
+      {key:"firmware", label:"Firmware version", type:"text"},
+      {key:"doorCount", label:"Doors on this panel", type:"text"},
+      {key:"networkDrop", label:"Network drop available", type:"select", options:["Yes","No","Unknown"]},
+      {key:"power", label:"Power source notes", type:"text", placeholder:"Dedicated circuit, UPS present?"}
+    ]
+  },
+  reader: {
+    label: "Reader",
+    fields: [
+      {key:"model", label:"Make / model", type:"text"},
+      {key:"protocol", label:"Protocol", type:"select", options:["OSDP","Wiegand","Proprietary","Unknown"]},
+      {key:"mount", label:"Mounting format", type:"select", options:["Single-gang","Mullion","Multi-gang","Other"]},
+      {key:"doorType", label:"Door type", type:"select", options:["Exterior","Interior","Resident unit","Gate / vehicle"]}
+    ]
+  },
+  door: {
+    label: "Door / Gate Hardware",
+    fields: [
+      {key:"hwType", label:"Hardware type", type:"select", options:["Strike","Maglock","Electrified panic hardware","Other"]},
+      {key:"rex", label:"REX device", type:"text"},
+      {key:"positionSwitch", label:"Door position switch present", type:"select", options:["Yes","No","Unknown"]},
+      {key:"gateMfr", label:"Gate operator manufacturer (if applicable)", type:"text"}
+    ]
+  },
+  credential: {
+    label: "Credential",
+    fields: [
+      {key:"formats", label:"Format(s) observed", type:"text", placeholder:"iCLASS, Prox, mobile, dual-tech..."},
+      {key:"estCount", label:"Estimated count", type:"text"},
+      {key:"vehicleBased", label:"Vehicle-based credential present", type:"select", options:["Yes","No","Unknown"]}
+    ]
+  },
+  camera: {
+    label: "Camera / VMS",
+    fields: [
+      {key:"vms", label:"VMS platform", type:"select", options:["ExacqVision","Avigilon","Other / Unknown"]},
+      {key:"model", label:"Camera make / model", type:"text"},
+      {key:"onvif", label:"ONVIF / RTSP capable", type:"select", options:["Yes","No","Unknown"]},
+      {key:"age", label:"Approx. age", type:"text"}
+    ]
+  },
+  network: {
+    label: "Network Infrastructure",
+    fields: [
+      {key:"switchCap", label:"Switch capacity notes", type:"text"},
+      {key:"poe", label:"PoE budget notes", type:"text"},
+      {key:"vlan", label:"VLAN segmentation in use", type:"select", options:["Yes","No","Unknown"]},
+      {key:"redundancy", label:"Internet redundancy notes", type:"text"}
+    ]
+  },
+  elopement: {
+    label: "Anti-Elopement Equipment",
+    fields: [
+      {key:"equip", label:"Equipment type", type:"text", placeholder:"e.g. RF Technologies tags/receivers"},
+      {key:"integration", label:"Integration with Premisys today", type:"text"}
+    ]
+  },
+  general: {
+    label: "General Note",
+    fields: []
+  }
+};
+
+let state = {
+  index: [],       // [{id, category, location, timestamp, photoCount, unsaved}]
+  entriesCache: {}, // id -> full entry object (loaded lazily)
+  editingId: null,
+  currentPhotos: []
+};
+
+const $ = (id) => document.getElementById(id);
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+
+function showBanner(el, msg, type){
+  el.textContent = msg;
+  el.className = "banner show " + type;
+  setTimeout(()=>{ el.className = "banner"; }, 3500);
+}
+
+async function init(){
+  populateCategorySelect();
+  await loadMeta();
+  await loadIndex();
+  renderList();
+}
+
+function populateCategorySelect(){
+  const sel = $("fCategory");
+  sel.innerHTML = "";
+  Object.keys(CATEGORIES).forEach(key=>{
+    const opt = document.createElement("option");
+    opt.value = key;
+    opt.textContent = CATEGORIES[key].label;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadMeta(){
+  let meta = {site:"Gwynedd Estates", date: todayStr(), surveyor:""};
+  try{
+    const res = await storage.get("survey-meta");
+    if(res && res.value){
+      meta = JSON.parse(res.value);
+    }
+  }catch(e){
+    // no meta saved yet — use defaults
+  }
+  $("metaSite").value = meta.site || "";
+  $("metaDate").value = meta.date || "";
+  $("metaSurveyor").value = meta.surveyor || "";
+  updateHeader(meta);
+}
+
+function updateHeader(meta){
+  $("siteTitle").textContent = meta.site || "Site Survey";
+  const parts = [];
+  if(meta.date) parts.push(meta.date);
+  if(meta.surveyor) parts.push(meta.surveyor);
+  $("siteSub").textContent = parts.length ? parts.join(" · ") : "RFP #26-12 walkthrough";
+}
+
+function toggleMeta(){
+  $("metaPanel").classList.toggle("open");
+}
+
+async function saveMeta(){
+  const meta = {
+    site: $("metaSite").value.trim(),
+    date: $("metaDate").value.trim(),
+    surveyor: $("metaSurveyor").value.trim()
+  };
+  updateHeader(meta);
+  try{
+    await storage.set("survey-meta", JSON.stringify(meta));
+  }catch(e){
+    showBanner($("banner"), "Info saved locally but couldn't sync — check connection.", "err");
+  }
+  $("metaPanel").classList.remove("open");
+}
+
+async function loadIndex(){
+  try{
+    const res = await storage.get("survey-index");
+    state.index = (res && res.value) ? JSON.parse(res.value) : [];
+  }catch(e){
+    state.index = [];
+  }
+}
+
+async function persistIndex(){
+  try{
+    await storage.set("survey-index", JSON.stringify(state.index));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function renderList(){
+  const area = $("listArea");
+  if(!state.index.length){
+    area.innerHTML = `<div class="empty-state">
+      <div class="big">No entries yet</div>
+      <div class="small">Tap the + button to log the first panel, reader, door, or camera you find.</div>
+    </div>`;
+    return;
+  }
+  const sorted = [...state.index].sort((a,b)=> b.timestamp - a.timestamp);
+  area.innerHTML = `<div class="entry-list">${sorted.map(cardHtml).join("")}</div>`;
+}
+
+function cardHtml(item){
+  const cat = CATEGORIES[item.category];
+  const thumbStyle = item.thumbDataUrl ? `style="background-image:url('${item.thumbDataUrl}')"` : "";
+  const countBadge = item.photoCount > 0 ? `<div class="count">${item.photoCount}</div>` : "";
+  const unsavedFlag = item.unsaved ? `<div class="save-flag">Not synced — tap to retry</div>` : "";
+  return `<div class="card" onclick="openEntry('${item.id}')">
+    <div class="thumb" ${thumbStyle}>${item.thumbDataUrl ? "" : "No photo"}${countBadge}</div>
+    <div class="body">
+      <div class="row1">
+        <span class="badge">${cat ? cat.label : item.category}</span>
+      </div>
+      <div class="loc">${escapeHtml(item.location || "(no location set)")}</div>
+      <div class="snippet">${escapeHtml(item.snippet || "")}</div>
+      <div class="ts">${new Date(item.timestamp).toLocaleString()}</div>
+      ${unsavedFlag}
+    </div>
+  </div>`;
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str || "";
+  return d.innerHTML;
+}
+
+function openNewEntry(){
+  state.editingId = null;
+  state.currentPhotos = [];
+  $("sheetTitle").textContent = "New Entry";
+  $("fCategory").value = "panel";
+  $("fLocation").value = "";
+  $("fNotes").value = "";
+  $("deleteRow").style.display = "none";
+  renderCategoryFields();
+  renderPhotoRow();
+  openSheet();
+}
+
+async function openEntry(id){
+  let entry = state.entriesCache[id];
+  if(!entry){
+    try{
+      const res = await storage.get("entry-"+id);
+      entry = res && res.value ? JSON.parse(res.value) : null;
+      if(entry) state.entriesCache[id] = entry;
+    }catch(e){
+      entry = null;
+    }
+  }
+  if(!entry){
+    showBanner($("banner"), "Couldn't load that entry — connection issue.", "err");
+    return;
+  }
+  state.editingId = id;
+  state.currentPhotos = entry.photos ? [...entry.photos] : [];
+  $("sheetTitle").textContent = "Edit Entry";
+  $("fCategory").value = entry.category;
+  $("fLocation").value = entry.location || "";
+  $("fNotes").value = entry.notes || "";
+  $("deleteRow").style.display = "flex";
+  renderCategoryFields(entry.fields || {});
+  renderPhotoRow();
+  openSheet();
+}
+
+function renderCategoryFields(existingValues){
+  existingValues = existingValues || {};
+  const catKey = $("fCategory").value;
+  const cat = CATEGORIES[catKey];
+  const container = $("dynamicFields");
+  container.innerHTML = "";
+  cat.fields.forEach(f=>{
+    const lbl = document.createElement("label");
+    lbl.textContent = f.label;
+    container.appendChild(lbl);
+    let input;
+    if(f.type === "select"){
+      input = document.createElement("select");
+      input.id = "dyn_"+f.key;
+      f.options.forEach(o=>{
+        const opt = document.createElement("option");
+        opt.value = o; opt.textContent = o;
+        input.appendChild(opt);
+      });
+      if(existingValues[f.key]) input.value = existingValues[f.key];
+    } else {
+      input = document.createElement("input");
+      input.type = "text";
+      input.id = "dyn_"+f.key;
+      if(f.placeholder) input.placeholder = f.placeholder;
+      if(existingValues[f.key]) input.value = existingValues[f.key];
+    }
+    container.appendChild(input);
+  });
+}
+
+function renderPhotoRow(){
+  const row = $("photoRow");
+  row.innerHTML = "";
+  state.currentPhotos.forEach((p, idx)=>{
+    const div = document.createElement("div");
+    div.className = "photo-thumb";
+    div.style.backgroundImage = `url('${p}')`;
+    const rm = document.createElement("div");
+    rm.className = "remove";
+    rm.textContent = "×";
+    rm.onclick = (e)=>{ e.stopPropagation(); state.currentPhotos.splice(idx,1); renderPhotoRow(); };
+    div.appendChild(rm);
+    row.appendChild(div);
+  });
+  if(state.currentPhotos.length < 6){
+    const addBtn = document.createElement("div");
+    addBtn.className = "add-photo-btn";
+    addBtn.textContent = "+";
+    addBtn.onclick = ()=> $("photoInput").click();
+    row.appendChild(addBtn);
+  }
+}
+
+function handlePhotoFile(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maxW = 1280;
+      let w = img.width, h = img.height;
+      if(w > maxW){
+        h = Math.round(h * (maxW / w));
+        w = maxW;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
+      state.currentPhotos.push(dataUrl);
+      renderPhotoRow();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = "";
+}
+
+function openSheet(){
+  $("overlay").classList.add("open");
+  $("sheet").classList.add("open");
+  $("entryBanner").className = "banner";
+}
+function closeSheet(){
+  $("overlay").classList.remove("open");
+  $("sheet").classList.remove("open");
+}
+function closeSheetIfOverlay(e){
+  if(e.target.id === "overlay") closeSheet();
+}
+
+async function saveEntry(){
+  const catKey = $("fCategory").value;
+  const cat = CATEGORIES[catKey];
+  const fields = {};
+  cat.fields.forEach(f=>{
+    const el = $("dyn_"+f.key);
+    if(el) fields[f.key] = el.value;
+  });
+  const location = $("fLocation").value.trim();
+  const notes = $("fNotes").value.trim();
+
+  const id = state.editingId || (Date.now().toString(36) + Math.random().toString(36).slice(2,6));
+  const entry = {
+    id, category: catKey, location, notes,
+    fields, photos: state.currentPhotos,
+    timestamp: state.editingId ? (state.entriesCache[id] ? state.entriesCache[id].timestamp : Date.now()) : Date.now()
+  };
+
+  const snippetParts = [];
+  cat.fields.slice(0,2).forEach(f=>{ if(fields[f.key]) snippetParts.push(fields[f.key]); });
+  if(!snippetParts.length && notes) snippetParts.push(notes);
+
+  const idxEntry = {
+    id, category: catKey, location,
+    snippet: snippetParts.join(" · "),
+    timestamp: entry.timestamp,
+    photoCount: entry.photos.length,
+    thumbDataUrl: entry.photos[0] || null,
+    unsaved: false
+  };
+
+  state.entriesCache[id] = entry;
+  const existingIdx = state.index.findIndex(i=>i.id === id);
+  if(existingIdx >= 0) state.index[existingIdx] = idxEntry;
+  else state.index.push(idxEntry);
+
+  let entryOk = true, indexOk = true;
+  try{
+    await storage.set("entry-"+id, JSON.stringify(entry));
+  }catch(e){ entryOk = false; }
+  indexOk = await persistIndex();
+
+  if(!entryOk || !indexOk){
+    idxEntry.unsaved = true;
+    const i2 = state.index.findIndex(i=>i.id === id);
+    if(i2>=0) state.index[i2] = idxEntry;
+    showBanner($("entryBanner"), "Saved on this device but couldn't sync yet — will retry when opened.", "err");
+  }
+
+  renderList();
+  closeSheet();
+}
+
+async function deleteEntry(){
+  if(!state.editingId) return;
+  const id = state.editingId;
+  state.index = state.index.filter(i=>i.id !== id);
+  delete state.entriesCache[id];
+  await persistIndex();
+  try{ await storage.delete("entry-"+id); }catch(e){}
+  renderList();
+  closeSheet();
+}
+
+function confirmReset(){
+  if(confirm("Clear all survey entries on this device? This can't be undone.")){
+    resetAll();
+  }
+}
+async function resetAll(){
+  for(const item of state.index){
+    try{ await storage.delete("entry-"+item.id); }catch(e){}
+  }
+  state.index = [];
+  state.entriesCache = {};
+  await persistIndex();
+  renderList();
+}
+
+async function openExport(){
+  const meta = {
+    site: $("metaSite").value || "Gwynedd Estates",
+    date: $("metaDate").value || todayStr(),
+    surveyor: $("metaSurveyor").value || ""
+  };
+  let lines = [];
+  lines.push(`SITE SURVEY — ${meta.site}`);
+  lines.push(`Date: ${meta.date}    Surveyor: ${meta.surveyor}`);
+  lines.push(`RFP #26-12 — Community Access Software`);
+  lines.push("=".repeat(50));
+  lines.push("");
+
+  const sorted = [...state.index].sort((a,b)=> a.timestamp - b.timestamp);
+  for(const item of sorted){
+    let entry = state.entriesCache[item.id];
+    if(!entry){
+      try{
+        const res = await storage.get("entry-"+item.id);
+        entry = res && res.value ? JSON.parse(res.value) : null;
+      }catch(e){ entry = null; }
+    }
+    const cat = CATEGORIES[item.category];
+    lines.push(`[${cat ? cat.label : item.category}] ${item.location || "(no location)"}`);
+    lines.push(`  Time: ${new Date(item.timestamp).toLocaleString()}`);
+    if(entry && entry.fields){
+      Object.keys(entry.fields).forEach(k=>{
+        const fieldDef = cat.fields.find(f=>f.key===k);
+        if(entry.fields[k]) lines.push(`  ${fieldDef ? fieldDef.label : k}: ${entry.fields[k]}`);
+      });
+    }
+    if(entry && entry.notes) lines.push(`  Notes: ${entry.notes}`);
+    lines.push(`  Photos attached: ${item.photoCount || 0}`);
+    lines.push("");
+  }
+  if(!sorted.length) lines.push("(No entries recorded yet.)");
+
+  $("exportText").value = lines.join("\n");
+  $("exportOverlay").classList.add("open");
+  $("exportSheet").classList.add("open");
+}
+function closeExport(){
+  $("exportOverlay").classList.remove("open");
+  $("exportSheet").classList.remove("open");
+}
+function closeExportIfOverlay(e){
+  if(e.target.id === "exportOverlay") closeExport();
+}
+async function shareExport(){
+  const text = $("exportText").value;
+  if(navigator.share){
+    try{ await navigator.share({title:"Site Survey Export", text}); return; }catch(e){}
+  }
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Copied to clipboard.");
+  }catch(e){
+    $("exportText").select();
+    alert("Select and copy the text manually.");
+  }
+}
+
+init();
+</script>
+</body>
+</html>
